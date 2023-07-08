@@ -19,11 +19,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory;
 
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * InitializingBean 对象实例化后，定制化初始化
+ * BeanPostProcessor 已经执行了初始化，postProcessAfterInitialization 后于 InitializingBean，一般可用于定制化注解
+ */
 @Slf4j
 public class RpcProvider implements InitializingBean, BeanPostProcessor {
 
@@ -78,6 +83,14 @@ public class RpcProvider implements InitializingBean, BeanPostProcessor {
         }
     }
 
+    /**
+     * 对所有初始化完成后的 Bean 进行扫描
+     * @see AbstractAutowireCapableBeanFactory#applyBeanPostProcessorsAfterInitialization(java.lang.Object, java.lang.String)
+     * @param bean spring 管理的bean
+     * @param beanName
+     * @return
+     * @throws BeansException
+     */
     @Override
     public Object postProcessAfterInitialization(Object bean, String beanName) throws BeansException {
         RpcService rpcService = bean.getClass().getAnnotation(RpcService.class);

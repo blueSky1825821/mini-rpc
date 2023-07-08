@@ -47,6 +47,7 @@ public class RpcConsumer {
         ServiceMeta serviceMetadata = registryService.discovery(serviceKey, invokerHashCode);
 
         if (serviceMetadata != null) {
+            //todo 优化
             ChannelFuture future = bootstrap.connect(serviceMetadata.getServiceAddr(), serviceMetadata.getServicePort()).sync();
             future.addListener((ChannelFutureListener) arg0 -> {
                 if (future.isSuccess()) {

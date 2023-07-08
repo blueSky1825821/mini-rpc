@@ -14,6 +14,9 @@ import io.netty.handler.codec.ByteToMessageDecoder;
 
 import java.util.List;
 
+/**
+ * 增加isWriteable判断水位线，避免对方read慢
+ */
 public class MiniRpcDecoder extends ByteToMessageDecoder {
 
     /*
@@ -24,13 +27,15 @@ public class MiniRpcDecoder extends ByteToMessageDecoder {
     +---------------------------------------------------------------+
     |                   数据内容 （长度不定）                          |
     +---------------------------------------------------------------+
+
+    out decoded 数据
     */
     @Override
     public final void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
         if (in.readableBytes() < ProtocolConstants.HEADER_TOTAL_LEN) {
             return;
         }
-        in.markReaderIndex();
+        in.markReaderIndex();//标记读指针位置
 
         short magic = in.readShort();
         if (magic != ProtocolConstants.MAGIC) {
@@ -45,6 +50,7 @@ public class MiniRpcDecoder extends ByteToMessageDecoder {
 
         int dataLength = in.readInt();
         if (in.readableBytes() < dataLength) {
+            //还不足一个完整的协议包，还原读指针位置，继续读
             in.resetReaderIndex();
             return;
         }

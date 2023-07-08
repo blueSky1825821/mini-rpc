@@ -35,7 +35,7 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.context = applicationContext;
     }
-
+    //使用spring 类加载器
     @Override
     public void setBeanClassLoader(ClassLoader classLoader) {
         this.classLoader = classLoader;
@@ -47,11 +47,11 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
             BeanDefinition beanDefinition = beanFactory.getBeanDefinition(beanDefinitionName);
             String beanClassName = beanDefinition.getBeanClassName();
             if (beanClassName != null) {
-                Class<?> clazz = ClassUtils.resolveClassName(beanClassName, this.classLoader);
+                Class<?> clazz = ClassUtils.resolveClassName(beanClassName, this.classLoader);//spring 类加载器处理
                 ReflectionUtils.doWithFields(clazz, this::parseRpcReference);
             }
         }
-
+        //@see org.springframework.beans.factory.support.DefaultListableBeanFactory.registerBeanDefinition
         BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
         this.rpcRefBeanDefinitions.forEach((beanName, beanDefinition) -> {
             if (context.containsBean(beanName)) {
@@ -62,6 +62,10 @@ public class RpcConsumerPostProcessor implements ApplicationContextAware, BeanCl
         });
     }
 
+    /**
+     * 获取字段上注解
+     * @param field 字段表示引用的服务
+     */
     private void parseRpcReference(Field field) {
         RpcReference annotation = AnnotationUtils.getAnnotation(field, RpcReference.class);
         if (annotation != null) {

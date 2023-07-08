@@ -13,6 +13,7 @@ public class ZKConsistentHashLoadBalancer implements ServiceLoadBalancer<Service
 
     @Override
     public ServiceInstance<ServiceMeta> select(List<ServiceInstance<ServiceMeta>> servers, int hashCode) {
+        //一致性hash treeMap排序
         TreeMap<Integer, ServiceInstance<ServiceMeta>> ring = makeConsistentHashRing(servers);
         return allocateNode(ring, hashCode);
     }

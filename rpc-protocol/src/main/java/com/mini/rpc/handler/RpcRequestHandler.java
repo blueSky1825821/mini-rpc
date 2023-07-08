@@ -25,11 +25,14 @@ public class RpcRequestHandler extends SimpleChannelInboundHandler<MiniRpcProtoc
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MiniRpcProtocol<MiniRpcRequest> protocol) {
+        //提交到自定义的业务线程池中，避免阻塞
         RpcRequestProcessor.submitRequest(() -> {
             MiniRpcProtocol<MiniRpcResponse> resProtocol = new MiniRpcProtocol<>();
             MiniRpcResponse response = new MiniRpcResponse();
             MsgHeader header = protocol.getHeader();
             header.setMsgType((byte) MsgType.RESPONSE.getType());
+            resProtocol.setHeader(header);
+            resProtocol.setBody(response);
             try {
                 Object result = handle(protocol.getBody());
                 response.setData(result);

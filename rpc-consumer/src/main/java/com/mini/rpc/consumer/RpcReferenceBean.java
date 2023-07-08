@@ -7,6 +7,10 @@ import org.springframework.beans.factory.FactoryBean;
 
 import java.lang.reflect.Proxy;
 
+/**
+ * FactoryBean IOC基础上给Bean的实现加上了一个简单工厂模式和装饰模式，可在getObject()配置，是一个Bean
+ * BeanFactory IOC容器或对象工厂，
+ */
 public class RpcReferenceBean implements FactoryBean<Object> {
 
     private Class<?> interfaceClass;
@@ -31,6 +35,10 @@ public class RpcReferenceBean implements FactoryBean<Object> {
         return interfaceClass;
     }
 
+    /**
+     * @see RpcConsumerPostProcessor#parseRpcReference(java.lang.reflect.Field) builder.setInitMethodNam
+     * @throws Exception
+     */
     public void init() throws Exception {
         RegistryService registryService = RegistryFactory.getInstance(this.registryAddr, RegistryType.valueOf(this.registryType));
         this.object = Proxy.newProxyInstance(
